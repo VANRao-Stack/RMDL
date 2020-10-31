@@ -27,7 +27,7 @@ from keras.callbacks import ModelCheckpoint
 np.random.seed(7)
 
 
-def Image_Classification(x_train, y_train, x_test, y_test, shape, batch_size=128,
+def Image_Classification(x_train, y_train, x_test, y_test, shape, x_test_final, batch_size=128,
                          sparse_categorical=True, random_deep=[3, 3, 3], epochs=[500, 500, 500], plot=False,
                          min_hidden_layer_dnn=1, max_hidden_layer_dnn=8, min_nodes_dnn=128, max_nodes_dnn=1024,
                          max_hidden_layer_rnn=5, min_nodes_rnn=32, max_nodes_rnn=128,
@@ -119,6 +119,8 @@ def Image_Classification(x_train, y_train, x_test, y_test, shape, batch_size=128
     np.random.seed(random_state)
     G.setup()
     y_proba = []
+    
+    output = []
 
     score = []
     history_ = []
@@ -169,7 +171,9 @@ def Image_Classification(x_train, y_train, x_test, y_test, shape, batch_size=128
                                   metrics=['accuracy'])
 
             y_pr = model_tmp.predict_classes(x_test, batch_size=batch_size)
+            y_final_output = model_tmp.predict_classes(x_test_final, batch_size=batch_size)
             y_proba.append(np.array(y_pr))
+            output.append(np.array(y_final_output))
             score.append(accuracy_score(y_test, y_pr))
             i = i + 1
             del model_tmp
@@ -217,8 +221,11 @@ def Image_Classification(x_train, y_train, x_test, y_test, shape, batch_size=128
             history_.append(history)
 
             y_pr = model_tmp.predict(x_test, batch_size=batch_size)
+            y_final_output = model_tmp.predict_classes(x_test_final, batch_size=batch_size)
             y_pr = np.argmax(y_pr, axis=1)
+            y_final_output = np.argmax(y_final_output, axis=1)
             y_proba.append(np.array(y_pr))
+            output.append(np.array(y_final_output))
             score.append(accuracy_score(y_test, y_pr))
             i = i+1
             del model_tmp
@@ -267,7 +274,9 @@ def Image_Classification(x_train, y_train, x_test, y_test, shape, batch_size=128
                               metrics=['accuracy'])
 
             y_pr = model_tmp.predict_classes(x_test, batch_size=batch_size)
+            y_final_output = model_tmp.predict_classes(x_test_final, batch_size=batch_size)
             y_proba.append(np.array(y_pr))
+            output.append(np.array(y_final_output))
             score.append(accuracy_score(y_test, y_pr))
             i = i+1
             del model_tmp
@@ -284,12 +293,18 @@ def Image_Classification(x_train, y_train, x_test, y_test, shape, batch_size=128
 
 
     y_proba = np.array(y_proba).transpose()
+    output = np.array(output).transpose()
     print(y_proba.shape)
+    final_output = []
     final_y = []
     for i in range(0, y_proba.shape[0]):
         a = np.array(y_proba[i, :])
         a = collections.Counter(a).most_common()[0][0]
         final_y.append(a)
+    for i in range(0, output.shape[0]):
+        a = np.array(y_proba[i, :])
+        a = collections.Counter(a).most_common()[0][0]
+        final_output.append(a)
     F_score = accuracy_score(y_test, final_y)
     F1 = f1_score(y_test, final_y, average='micro')
     F2 = f1_score(y_test, final_y, average='macro')
@@ -314,3 +329,5 @@ def Image_Classification(x_train, y_train, x_test, y_test, shape, batch_size=128
     print("F1_Micro:",F1)
     print("F1_Macro:",F2)
     print("F1_weighted:",F3)
+
+    return final_output
