@@ -302,7 +302,7 @@ def Image_Classification(x_train, y_train, x_test, y_test, shape, x_test_final, 
         a = collections.Counter(a).most_common()[0][0]
         final_y.append(a)
     for i in range(0, output.shape[0]):
-        a = np.array(y_proba[i, :])
+        a = np.array(output[i, :])
         a = collections.Counter(a).most_common()[0][0]
         final_output.append(a)
     F_score = accuracy_score(y_test, final_y)
